@@ -3,11 +3,17 @@ import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 import express from "express";
-const router = express.Router();
 
 dotenv.config();
 
-const server = http.createServer();
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -38,14 +44,12 @@ io.on("connection", (socket) => {
       const partnerSocket = io.sockets.sockets.get(partnerId);
       const roomId = uuidv4();
 
-      // Join both sockets into the same Socket.IO room
       socket.join(roomId);
       partnerSocket.join(roomId);
 
       activePairs.set(socket.id, { partnerId, roomId });
       activePairs.set(partnerId, { partnerId: socket.id, roomId });
 
-      // Tell one peer to initiate the WebRTC offer (`initiator: true`)
       socket.emit("matched", { roomId, initiator: true });
       partnerSocket.emit("matched", { roomId, initiator: false });
     } else {
@@ -89,10 +93,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
-});
-
-router.get("/", (req, res) => {
-  res.send("Server is running");
 });
