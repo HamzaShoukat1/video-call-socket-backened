@@ -2,6 +2,8 @@ import http from "http";
 import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
+import express from "express";
+const router = express.Router();
 
 dotenv.config();
 
@@ -89,4 +91,8 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+router.get("/", (req, res) => {
+  res.send("Server is running");
 });
